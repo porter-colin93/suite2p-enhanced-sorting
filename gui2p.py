@@ -232,7 +232,7 @@ class MainWindow(QMainWindow):
         if self.loaded:
             self.ROIedit.setText(str(self.ichosen-1))
             self.number_chosen()
-            print("test")
+            #print("test")
    
                 
     def choiceYes(self):
