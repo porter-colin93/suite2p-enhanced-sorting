@@ -10,7 +10,7 @@ The modifications require both replacing the gui2p.py file and uninstalling PyQt
    - Open an anaconda prompt / command prompt with `conda` for python 3 in the path.
    - If existing installation of Suite2P exists, remove it and the environment with `conda env remove --name myenv --all`, replacing `myenv` with the conda environment that previously stored the Suite2P installation (likely `suite2p`).
    - Create a new conda environment with `conda create --name suite2p python=3.9`.
-   - Activate the new conda environment by running 'conda activate suite2p'.
+   - Activate the new conda environment by running `conda activate suite2p`.
    - Install the GUI version of Suite2P with `python -m pip install suite2p[gui]`. If you're on a zsh server, you may need to use `' '` around the suite2p[gui] call: `python -m pip install 'suite2p[gui]'`. This also installs the NWB dependencies.
    - For additional dependencies, like h5py, NWB, Scanbox, and server job support, use the command `python -m pip install suite2p[io]`.
    - Run `python -m suite2p` to check the download and installation of Suite2P was successful. Running the command `suite2p --version` in the terminal will print the install version of suite2p.
