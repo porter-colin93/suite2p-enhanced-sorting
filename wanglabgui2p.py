@@ -9,6 +9,27 @@ from . import menus, io, merge, views, buttons, classgui, traces, graphics, mask
 from .. import run_s2p, default_ops
 
 
+class SortROIWindow(QDialog):
+    """
+    This window is linked to the MainWindowan allows to sort ROIs into more than good/bad classes.
+    It is opened by pressing the "Sort ROIs" button in the MainWindow.
+    """
+    def __init__()
+        super().__init__()
+
+        self.setWindowTitle("Wang Lab Suite2P Custom Sort ROIs Window")
+        self.setGeometry(100, 100, 400, 200)
+
+        layout = QVBoxLayout()
+
+        # Add widgets to the subwindow
+        layout.addWidget(QPushButton("Close Sub Window", self, clicked=self.close))
+
+        self.setLayout(layout)
+
+
+
+
 class MainWindow(QMainWindow):
     def __init__(self, statfile=None):
         super(MainWindow, self).__init__()
@@ -83,8 +104,6 @@ class MainWindow(QMainWindow):
         self.rois = {"iROI": 0, "Sroi": 0, "Lam": 0, "LamMean": 0, "LamNorm": 0}
         self.colors = {"RGB": 0, "cols": 0, "colorbar": []}
 
-        # --------- MAIN WIDGET LAYOUT ---------------------
-        cwidget = QWidget()
         self.l0 = QGridLayout()
         cwidget.setLayout(self.l0)
         self.setCentralWidget(cwidget)
@@ -158,7 +177,11 @@ class MainWindow(QMainWindow):
         self.stats_to_show = [
             "med", "npix", "skew", "compact", "footprint", "aspect_ratio"
         ]
-        #adding autoROI functionality
+
+
+        ### Added code START ###
+
+        # adding autoROI functionality
         autoROIeditYes = QPushButton("[:Cell", self)
         self.l0.addWidget(autoROIeditYes, b0, 0, 1, 1)
         autoROIeditYes.clicked.connect(self.choiceYes)
@@ -173,7 +196,15 @@ class MainWindow(QMainWindow):
         autoROIback.clicked.connect(self.previousOne)
         autoROIback.setShortcut("\\")
         b0+=1
+
+        # adding second window functionality
+        # Add a button to open the subwindow
+        button = QPushButton("Open Custom Sorting Window", self, clicked=self.open_sub_window)
+        self.setCentralWidget(button)
+
+        ### Added code END ###
         
+
         lilfont = QtGui.QFont("Arial", 8)
         qlabel = QLabel(self)
         qlabel.setFont(self.boldfont)
@@ -228,6 +259,17 @@ class MainWindow(QMainWindow):
         1, 2)
         
         return b0
+    
+
+    ### Added code START ###
+
+    def open_sub_window(self):
+        # Create and show the subwindow
+        sub_window = SubWindow()
+        sub_window.exec_()
+
+    ### Added code END ###
+    
     
     def previousOne(self):
         if self.loaded:
