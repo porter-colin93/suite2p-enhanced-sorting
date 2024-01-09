@@ -29,4 +29,4 @@ The modifications require both replacing the gui2p.py file and uninstalling PyQt
 4. Uninstall PyQt6 by running `python -m pip uninstall PyQt6`. Check PyQt5 is installed by running `python -m pip install PyQt5`.
 5. Now, you should be able to reactive the `suite2p` environment by running `conda deactivate` followed by `conda activate suite2p`. Then to run Suite2P with the enhanced user interface, run `python -m suite2p`. On future start up of Suite2P, activate the conda environment for Suite2P by running `conda activate suite2p` followed by `python -m suite2p`. For more information on Suite2P, read the documentation found at https://suite2p.readthedocs.io/
 
-For help or more issues, please contact Colin Porter (colin.porter@mpfi.org). We will do our best to keep this updated with the latest version of suite2p and create functionality with PyQt6 in the future.
+For help or more issues, submit an issue on the GitHub repository. We will do our best to keep this updated with the latest version of suite2p and create functionality with PyQt6 in the future.
