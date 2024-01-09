@@ -3,31 +3,75 @@ import os, pathlib, shutil, sys, warnings
 import numpy as np
 import pyqtgraph as pg
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QGridLayout, QCheckBox, QLineEdit, QLabel, QPushButton, QAction, QSlider
+from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QDialog, QVBoxLayout, QPushButton, QWidget, QGridLayout, QCheckBox, QLineEdit, QLabel, QPushButton, QAction, QSlider
 from PyQt5.QtCore import Qt
 from . import menus, io, merge, views, buttons, classgui, traces, graphics, masks
 from .. import run_s2p, default_ops
 
 
-class SortROIWindow(QDialog):
-    """
-    This window is linked to the MainWindowan allows to sort ROIs into more than good/bad classes.
-    It is opened by pressing the "Sort ROIs" button in the MainWindow.
-    """
-    def __init__()
+class SubWindow(QDialog):
+    def __init__(self, main_window=None):
         super().__init__()
 
-        self.setWindowTitle("Wang Lab Suite2P Custom Sort ROIs Window")
+        self.main_window = main_window
+
+        self.setWindowTitle("Sub Window")
         self.setGeometry(100, 100, 400, 200)
+
+        self.dictionary = {}  # Dictionary to be created and managed by the subwindow
 
         layout = QVBoxLayout()
 
         # Add widgets to the subwindow
-        layout.addWidget(QPushButton("Close Sub Window", self, clicked=self.close))
+        self.label = QLabel("How many buttons would you like?")
+        self.layout_buttons = QVBoxLayout()
+
+        self.num_buttons_edit = QLineEdit(self)
+        self.num_buttons_edit.setPlaceholderText("Enter a number")
+
+        self.ok_button = QPushButton("OK", self, clicked=self.handle_ok_button)
+
+        layout.addWidget(self.label)
+        layout.addWidget(self.num_buttons_edit)
+        layout.addLayout(self.layout_buttons)
+        layout.addWidget(self.ok_button)
+
+        # New button to save the dictionary
+        self.save_button = QPushButton("Save Dictionary", self, clicked=self.save_dictionary)
 
         self.setLayout(layout)
 
+    def handle_ok_button(self):
+        # Get the number of buttons from the user input
+        num_buttons_text = self.num_buttons_edit.text()
+        try:
+            num_buttons = int(num_buttons_text)
+        except ValueError:
+            num_buttons = 0
 
+        # Create buttons for each number with corresponding hotkeys
+        for i in range(1, min(num_buttons, 10) + 1):
+            button = QPushButton(f"Button {i}")
+            button.setShortcut(f"{i}")  # Set hotkey for each button
+            button.clicked.connect(lambda _, idx=i: self.main_window.button_clicked(idx))
+            self.layout_buttons.addWidget(button)
+
+    def closeEvent(self, event):
+        # Prevent the subwindow from closing when the "OK" button is clicked
+        event.accept()
+    
+    def save_dictionary(self):
+        # Ask the user for a file name to save the dictionary
+        file_dialog = QFileDialog(self)
+        file_path, _ = file_dialog.getSaveFileName(self, "Save Dictionary", "", "Text Files (*.txt)")
+
+        if file_path:
+            # Save the dictionary to the specified file
+            with open(file_path, 'w') as file:
+                for key, value in self.dictionary.items():
+                    file.write(f"{key}: {value}\n")
+
+            print(f"Dictionary saved to {file_path}")
 
 
 class MainWindow(QMainWindow):
@@ -104,6 +148,8 @@ class MainWindow(QMainWindow):
         self.rois = {"iROI": 0, "Sroi": 0, "Lam": 0, "LamMean": 0, "LamNorm": 0}
         self.colors = {"RGB": 0, "cols": 0, "colorbar": []}
 
+        # --------- MAIN WIDGET LAYOUT ---------------------
+        cwidget = QWidget()
         self.l0 = QGridLayout()
         cwidget.setLayout(self.l0)
         self.setCentralWidget(cwidget)
@@ -195,12 +241,15 @@ class MainWindow(QMainWindow):
         self.l0.addWidget(autoROIback, b0, 0, 1, 1)
         autoROIback.clicked.connect(self.previousOne)
         autoROIback.setShortcut("\\")
-        b0+=1
+        
 
         # adding second window functionality
         # Add a button to open the subwindow
-        button = QPushButton("Open Custom Sorting Window", self, clicked=self.open_sub_window)
-        self.setCentralWidget(button)
+        openbutton = QPushButton("Open Custom Sorting Window", self, clicked=self.open_sub_window)
+        self.l0.addWidget(openbutton, b0, 1, 1, 1)
+        b0+=1
+
+        self.sub_window = None  # Initialize the reference to the subwindow
 
         ### Added code END ###
         
@@ -264,9 +313,36 @@ class MainWindow(QMainWindow):
     ### Added code START ###
 
     def open_sub_window(self):
-        # Create and show the subwindow
-        sub_window = SubWindow()
-        sub_window.exec_()
+        # Only create and show the subwindow if it's not already open
+        if self.sub_window is None or not self.sub_window.isVisible():
+            self.sub_window = SubWindow(self)
+            self.sub_window.setAttribute(Qt.WA_DeleteOnClose, False)
+            self.sub_window.show()
+
+            # Process the selected classes
+            if self.sub_window.result() == QDialog.Accepted:
+                print("Selected classes:")
+                for i in range(self.sub_window.layout_classes.count()):
+                    checkbox = self.sub_window.layout_classes.itemAt(i).widget()
+                    if checkbox.isChecked():
+                        print(checkbox.text())
+
+            # Connect the subwindow's destroyed signal to a slot
+            self.sub_window.destroyed.connect(self.sub_window_closed)
+
+    def sub_window_closed(self):
+        # Handle the subwindow being closed
+        self.sub_window = None
+
+    def button_clicked(self, button_number):
+        if button_number == 1:
+            self.choiceYes()
+            self.sub_window.dictionary[str(self.ichosen)] = button_number
+        else:
+            self.choiceNo()
+            self.sub_window.dictionary[str(self.ichosen)] = button_number
+
+        print(f"Button {button_number} clicked in the main window")
 
     ### Added code END ###
     
